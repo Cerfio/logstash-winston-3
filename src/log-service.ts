@@ -5,7 +5,6 @@ class LogService {
 	private static instance: LogService;
 	private logger: winston.Logger;
 	private serviceName: string;
-    private prettyPrint: boolean = false;
 
 	private constructor({
 		serviceName,
@@ -58,6 +57,7 @@ class LogService {
 						ssl_enable: sslEnable,
 						max_connect_retries: maxConnectRetries,
 					}),
+					new winston.transports.Console(),
 				],
 				silent,
 				exitOnError: false,
@@ -132,27 +132,29 @@ class LogService {
 		this.logger.level = level;
 	}
 
-    public setStringifyLogs(stringify: boolean, prettyPrint: boolean = false): void {
-        this.logger.format = winston.format.combine(
-            winston.format.timestamp(),
-            winston.format.errors({ stack: true }),
-            winston.format.splat(),
-            winston.format.json({ space: prettyPrint ? 2 : 0 }),
-            winston.format.printf(({ level, message, timestamp, stack }) => {
-                const obj: { [key: string]: any } = {
-                    timestamp: timestamp,
-                    level: level.toUpperCase(),
-                    message: message,
-                    serviceName: this.serviceName,
-                };
-                if (stack) {
-                    obj.stack = stack;
-                }
-                return JSON.stringify(obj, null, prettyPrint ? 2 : 0);
-            })
-        );
-        this.prettyPrint = prettyPrint;
-    }
+	public setStringifyLogs(
+		prettyPrint: boolean = false,
+	): void {
+		this.logger.format = winston.format.combine(
+			winston.format.timestamp(),
+			winston.format.errors({ stack: true }),
+			winston.format.splat(),
+			winston.format.json({ space: prettyPrint ? 2 : 0 }),
+			winston.format.printf(({ level, message, timestamp, stack }) => {
+				const obj: { [key: string]: any } = {
+					timestamp: timestamp,
+					level: level.toUpperCase(),
+					message: message,
+					serviceName: this.serviceName,
+				};
+				if (stack) {
+					obj.stack = stack;
+				}
+				return JSON.stringify(obj, null, prettyPrint ? 2 : 0);
+			}),
+		);
+		this.prettyPrint = prettyPrint;
+	}
 
 	public setSilent(silent: boolean): void {
 		this.logger.silent = silent;
