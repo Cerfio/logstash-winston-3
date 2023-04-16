@@ -29,7 +29,7 @@ LogService is an npm package that simplifies log management for your application
 ## Installation 🚀
 
 ```bash
-npm install --save log-service
+npm install --save logstash-winston-3 
 ```
 
 ## Usage 🤖
@@ -39,7 +39,7 @@ npm install --save log-service
 To use LogService, you need to create an instance of the LogService class by providing it with the required parameters.
 
 ```typescript
-import { LogService } from "log-service";
+import { LogService } from "logstash-winston-3";
 
 const logger = LogService.getInstance({
   serviceName: "my-app",
@@ -121,7 +121,7 @@ To use LogService in your NestJS application, you can create a logger provider t
 
 ```typescript
 import { Provider } from "@nestjs/common";
-import { LogService } from "log-service";
+import { LogService } from "logstash-winston-3";
 
 export const LoggerProvider: Provider = {
   provide: "Logger",
