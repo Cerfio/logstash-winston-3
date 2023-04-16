@@ -30,7 +30,6 @@ class LogService {
 		showLevel?: boolean;
 		silent?: boolean;
 	}) {
-		console.log("LogService constructor");
 		try {
 			this.logger = winston.createLogger({
 				level,
