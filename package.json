@@ -1,0 +1,34 @@
+{
+  "name": "logstash-winston-3",
+  "version": "2.0.1",
+  "description": "This NPM module provides a LogService class for centralized logging in microservices. It uses Winston library to format and send logs to Logstash for further processing by Elasticsearch. This class can be used in your microservices to centralize and standardize log management.",
+  "main": "dist/log-service.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "log",
+    "logging",
+    "winston",
+    "logstash",
+    "elasticsearch",
+    "microservices",
+    "ELK",
+    "nest"
+  ],
+  "author": "cerfio",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Cerfio/logstash-winston-3.git"
+  },
+  "dependencies": {
+    "winston": "^3.8.2",
+    "winston-logstash-transport": "^2.0.0"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  }
+}
