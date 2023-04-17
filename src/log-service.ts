@@ -5,6 +5,7 @@ class LogService {
 	private static instance: LogService;
 	private logger: winston.Logger;
 	private serviceName: string;
+	private callback: Function;
 
 	private constructor({
 		serviceName,
@@ -17,6 +18,8 @@ class LogService {
 		prettyPrint = false,
 		showLevel = true,
 		silent = false,
+		enableConsole = false,
+		callback,
 	}: {
 		serviceName: string;
 		logstashHost: string;
@@ -28,8 +31,23 @@ class LogService {
 		prettyPrint?: boolean;
 		showLevel?: boolean;
 		silent?: boolean;
+		enableConsole?: boolean;
+		callback: Function;
 	}) {
 		try {
+			const transports = [
+				new LogstashTransport({
+					host: logstashHost,
+					port: logstashPort,
+					ssl_enable: sslEnable,
+					max_connect_retries: maxConnectRetries,
+				}),
+			];
+
+			if (enableConsole) {
+				transports.push(new winston.transports.Console());
+			}
+
 			this.logger = winston.createLogger({
 				level,
 				format: winston.format.combine(
@@ -50,15 +68,7 @@ class LogService {
 						return JSON.stringify(obj, null, prettyPrint ? 2 : 0);
 					}),
 				),
-				transports: [
-					new LogstashTransport({
-						host: logstashHost,
-						port: logstashPort,
-						ssl_enable: sslEnable,
-						max_connect_retries: maxConnectRetries,
-					}),
-					new winston.transports.Console(),
-				],
+				transports,
 				silent,
 				exitOnError: false,
 			});
@@ -66,6 +76,7 @@ class LogService {
 			console.log("Cannot establish connection to logstash", e);
 		}
 		this.serviceName = serviceName;
+		this.callback = callback;
 	}
 
 	public static getInstance({
@@ -79,6 +90,7 @@ class LogService {
 		prettyPrint = false,
 		showLevel = true,
 		silent = false,
+		callback,
 	}: {
 		serviceName: string;
 		logstashHost: string;
@@ -90,6 +102,7 @@ class LogService {
 		prettyPrint?: boolean;
 		showLevel?: boolean;
 		silent?: boolean;
+		callback: Function;
 	}): LogService {
 		if (!LogService.instance) {
 			LogService.instance = new LogService({
@@ -103,12 +116,22 @@ class LogService {
 				prettyPrint,
 				showLevel,
 				silent,
+				callback,
 			});
 		}
 		return LogService.instance;
 	}
 
+	private callCallback(level: string, message: string): void {
+		this.callback(level, message);
+	}
+
 	public log(level: string, message: string, meta?: object): void {
+		const levels = ["error", "warn", "debug"];
+		const defaultLevel = "log";
+		if (this.callback) {
+			this.callCallback(levels.includes(level) ? level : defaultLevel, message);
+		}
 		this.logger.log(level, message, { ...meta, serviceName: this.serviceName });
 	}
 
@@ -132,9 +155,7 @@ class LogService {
 		this.logger.level = level;
 	}
 
-	public setStringifyLogs(
-		prettyPrint: boolean = false,
-	): void {
+	public setStringifyLogs(prettyPrint: boolean = false): void {
 		this.logger.format = winston.format.combine(
 			winston.format.timestamp(),
 			winston.format.errors({ stack: true }),
@@ -153,7 +174,6 @@ class LogService {
 				return JSON.stringify(obj, null, prettyPrint ? 2 : 0);
 			}),
 		);
-		this.prettyPrint = prettyPrint;
 	}
 
 	public setSilent(silent: boolean): void {

@@ -1,6 +1,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![npm version](https://badge.fury.io/js/logstash-winston-3.svg)](https://badge.fury.io/js/logstash-winston-3)
 [![npm downloads](https://img.shields.io/npm/dt/logstash-winston-3.svg)](https://www.npmjs.com/package/logstash-winston-3)
+
 ## Table of Contents
 
 - [LogService 📝](#logservice-)
@@ -17,6 +18,7 @@
     - [Create a Logger Provider](#create-a-logger-provider)
     - [Inject the Logger](#inject-the-logger)
     - [Use the Logger with Context](#use-the-logger-with-context)
+    - [Keep the default winston logs in the console](#keep-the-default-winston-logs-in-the-console)
   - [FAQ](#faq)
   - [Contributing](#contributing)
   - [License 📜](#license-)
@@ -29,7 +31,7 @@ LogService is an npm package that simplifies log management for your application
 ## Installation 🚀
 
 ```bash
-npm install --save logstash-winston-3 
+npm install --save logstash-winston-3
 ```
 
 ## Usage 🤖
@@ -180,6 +182,29 @@ async myMethod() {
 
 In this example, we are adding the name of the method ("myMethod") as the context for our logs. This makes it easier to trace which method generated the log message.
 
+### Keep the default winston logs in the console
+
+If you want to keep the default winston logs in the console, you can use the following code:
+
+```typescript
+import { Provider } from "@nestjs/common";
+import { LogService } from "logstash-winston-3";
+
+export const LoggerProvider: Provider = {
+  provide: "Logger",
+  useFactory: () => {
+    return LogService.getInstance({
+      serviceName: "my-app",
+      logstashHost: "localhost",
+      logstashPort: 5000,
+      callback: (level: "error" | "warn" | "debug", message: string) => {
+        logger[level](`${message}`);
+      },
+    });
+  },
+};
+```
+
 ## FAQ
 
 1. How can I configure LogService to send logs to Logstash?
@@ -250,4 +275,5 @@ Please make sure to follow our code of conduct and our contribution guidelines w
 LogService is distributed under the MIT license. See the [LICENSE](LICENSE) file for details.
 
 ## Author 🙋‍♀️
+
 This package was created by [Cerfio](https://github.com/Cerfio). Please consider [starring the project](https://github.com/Cerfio/logstash-winston-3) on Github if you find it helpful! ✨
